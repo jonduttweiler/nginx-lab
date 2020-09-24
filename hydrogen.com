@@ -3,6 +3,10 @@ map $uri $key{
     default '';
 }
 
+log_format notes '[$time_iso8601] ' 
+		             '$remote_addr $scheme "$request" $status '
+                 'key:$key upstream:$upstream_addr';
+
 upstream nodebackend {
   hash $key consistent;
   server localhost:3001;
@@ -16,6 +20,7 @@ server {
 
   server_name hydrogen.com;
 
+  access_log /var/log/nginx/notes.log notes;
   location / {
     proxy_pass http://nodebackend/get-key/$key;
   }
